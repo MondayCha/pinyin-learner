@@ -6,6 +6,10 @@ import styles from './index.module.less'
 
 import type { GridProps } from './Grid'
 
+import clickSoundPath from '@/assets/sounds/click.wav'
+import beepSoundPath from '@/assets/sounds/beep.wav'
+import hintSoundPath from '@/assets/sounds/hint.wav'
+
 export interface FourLinesGridProps extends GridProps {
   value?: string
   onChange?: (value: string) => void
@@ -19,9 +23,30 @@ export default function FourLinesGrid(props: FourLinesGridProps) {
   })
   const [focued, { toggle }] = useBoolean(false)
 
+  const clickSound = React.useMemo(() => {
+    return new Audio(clickSoundPath)
+  }, [])
+  const beepSound = React.useMemo(() => {
+    return new Audio(beepSoundPath)
+  }, [])
+  const hintSound = React.useMemo(() => {
+    return new Audio(hintSoundPath)
+  }, [])
+
   const handleChange = (nextValue = '') => {
     if (original && original.length >= nextValue.length) {
-      setValue(nextValue.toLowerCase())
+      setValue((prevValue) => {
+        if (prevValue.length < nextValue.length) {
+          if (original === nextValue) {
+            hintSound.play()
+          } else if (original.startsWith(nextValue)) {
+            clickSound.play()
+          } else {
+            beepSound.play()
+          }
+        }
+        return nextValue.toLowerCase()
+      })
     }
   }
 

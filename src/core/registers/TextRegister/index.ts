@@ -1,39 +1,39 @@
 export enum CharType {
-  Mark = 'Mark',
-  Hanzi = 'Hanzi',
+  Mark,
+  Hanzi,
 }
 
 export interface MarkCharConfig {
-  type: CharType.Mark;
-  char: string;
+  type: CharType.Mark
+  char: string
 }
 
 export interface HanziCharConfig {
-  type: CharType.Hanzi;
-  char: string;
-  quanpin: string;
+  type: CharType.Hanzi
+  char: string
+  quanpin: string
 }
 
 export interface TextConfig {
-  key: string;
-  title: string;
-  description?: string;
-  text: (MarkCharConfig | HanziCharConfig)[];
+  key: string
+  title: string
+  description?: string
+  text: (MarkCharConfig | HanziCharConfig)[]
 }
 
 export interface LoadOptions extends Omit<TextConfig, 'text'> {
-  content: string;
-  pinyin: string;
+  content: string
+  pinyin: string
 }
 
 export default class TextRegister {
-  public texts: TextConfig[] = [];
+  public texts: TextConfig[] = []
 
   public register(text: TextConfig) {
     if (this.texts.some(({ key }) => key === text.key)) {
-      return;
+      return
     }
-    this.texts.push(text);
+    this.texts.push(text)
   }
 
   /**
@@ -46,32 +46,38 @@ export default class TextRegister {
    *   - 已知问题 “其”标记为“ji”
    */
   public load(options: LoadOptions) {
-    const contentSegments = options.content.replace(/[ \n]/g, '').split('').filter(Boolean);
-    const pinyinSegments = options.pinyin.replace(/[\n]/g, ' ').split(/ /g).filter(Boolean);
-    const text: TextConfig['text'] = [];
+    const contentSegments = options.content
+      .replace(/[ \n]/g, '')
+      .split('')
+      .filter(Boolean)
+    const pinyinSegments = options.pinyin
+      .replace(/[\n]/g, ' ')
+      .split(/ /g)
+      .filter(Boolean)
+    const text: TextConfig['text'] = []
     pinyinSegments.forEach((item, index) => {
       if (/^[a-z]+$/.test(item.toLowerCase())) {
         text.push({
           type: CharType.Hanzi,
           char: contentSegments[index],
           quanpin: item,
-        });
+        })
       } else {
         text.push({
           type: CharType.Mark,
           char: contentSegments[index],
-        });
+        })
       }
-    });
+    })
     this.register({
       key: options.key,
       title: options.title,
       text,
-    });
+    })
   }
 
   public getTextConfig(textKey: string) {
-    return this.texts.find(({ key }) => key === textKey);
+    return this.texts.find(({ key }) => key === textKey)
   }
 
   public getTextOptions() {
@@ -79,7 +85,7 @@ export default class TextRegister {
       return {
         key: item.key,
         title: item.title,
-      };
-    });
+      }
+    })
   }
 }

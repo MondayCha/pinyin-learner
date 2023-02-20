@@ -1,5 +1,10 @@
 @import (reference) 'antd/lib/style/themes/default';
 
+@font-face {
+  font-family: 'italics';
+  src: url('@/assets/fonts/italics.woff2');
+}
+
 @container-padding: 24px;
 @char-box-size: 200px;
 
@@ -18,9 +23,8 @@
 }
 
 .zi {
-  font-size: 120px;
+  font-size: 150px;
+  font-family: 'italics';
   text-align: center;
-  width: @char-box-size;
-  height: @char-box-size;
   user-select: none;
 }

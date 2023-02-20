@@ -1,3 +1,1 @@
-import './ChuShiBian';
-import './HelloWorld';
-import './Saying';
+import './Saying'
