@@ -1,32 +1,17 @@
 import React from 'react'
-import {
-  Button,
-  Drawer,
-  Form,
-  Input,
-  List,
-  Modal,
-  Select,
-  Tooltip,
-  Typography,
-} from 'antd'
-import {
-  CloudDownloadOutlined,
-  CloudUploadOutlined,
-  GithubOutlined,
-  LoadingOutlined,
-  RedoOutlined,
-  SettingOutlined,
-} from '@ant-design/icons'
-import { useBoolean } from 'ahooks'
+import { Button, Input, Select, Tooltip } from 'antd'
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
+
+import { Hanzi } from '@/components'
 
 import useProfileBin from './useProfileBin'
+
 import styles from './index.module.less'
 
 import type { HanziCharConfig } from '@/core'
 
 import { CharType, Registry } from '@/core'
-import { Hanzi } from '@/components'
+import { useBoolean } from 'ahooks'
 
 const mouseEnterDelay = 0.5
 
@@ -34,24 +19,14 @@ export default function Hero() {
   const schemaOptions = Registry.schema.getSchemaOptions()
   const textOptions = Registry.text.getTextOptions()
 
-  const [formRef] = Form.useForm()
-  const {
-    bin,
-    onChangeBin,
-    detailLoading,
-    updateLoading,
-    onSignIn,
-    onUpload,
-    onDownload,
-    onClearCache,
-  } = useProfileBin({
+  const [hiddenPinyin, { toggle: toggleHiddenPinyin }] = useBoolean(false)
+
+  const { bin, onChangeBin } = useProfileBin({
     schemaType: schemaOptions[0]?.type,
     textKey: textOptions[0]?.key,
     inputTextIndex: 0,
     inputPinyin: '',
   })
-  const [visible, setVisible] = React.useState(false)
-  const [settingsVisible, { toggle: toggleSettingsVisible }] = useBoolean(false)
 
   const textConfig = React.useMemo(() => {
     return Registry.text.getTextConfig(bin?.textKey || textOptions[0]?.key)
@@ -94,14 +69,11 @@ export default function Hero() {
           original={currentPinyin}
           modified={bin.inputPinyin}
           onChange={(value) => onChangeBin({ inputPinyin: value })}
+          hidden={hiddenPinyin}
         />
       </div>
       <div className={styles.menu}>
         <Input.Group compact>
-          <Button
-            icon={<SettingOutlined />}
-            onClick={() => toggleSettingsVisible()}
-          />
           <Select
             style={{
               width: 100,
@@ -128,110 +100,34 @@ export default function Hero() {
               onChangeBin({ inputTextIndex: 0, textKey: value })
             }}
           />
-          <Tooltip overlay='重置本地输入状态' mouseEnterDelay={mouseEnterDelay}>
-            <Button
-              onClick={() => {
-                onChangeBin({ inputTextIndex: 0, inputPinyin: '' })
+          <Tooltip overlay='跳转到' mouseEnterDelay={mouseEnterDelay}>
+            <Input
+              style={{
+                width: 80,
               }}
-              icon={<RedoOutlined />}
-            />
-          </Tooltip>
-          <Tooltip
-            overlay='同步本地状态到云端'
-            mouseEnterDelay={mouseEnterDelay}
-          >
-            <Button
-              icon={
-                updateLoading ? <LoadingOutlined /> : <CloudUploadOutlined />
-              }
-              onClick={() => {
-                onUpload(() => setVisible(true))
-              }}
-            />
-          </Tooltip>
-          <Tooltip
-            overlay='同步云端状态到本地'
-            mouseEnterDelay={mouseEnterDelay}
-          >
-            <Button
-              icon={
-                detailLoading ? <LoadingOutlined /> : <CloudDownloadOutlined />
-              }
-              onClick={() => {
-                onDownload(() => {
-                  setVisible(true)
+              placeholder='第几个'
+              value={bin.inputTextIndex ?? 0}
+              type='number'
+              max={(textConfig?.text.length ?? 1) - 1}
+              min={0}
+              onChange={(e) => {
+                onChangeBin({
+                  inputTextIndex: Number(e.target.value),
                 })
               }}
             />
           </Tooltip>
+          <Tooltip
+            overlay={hiddenPinyin ? '显示注音' : '隐藏注音'}
+            mouseEnterDelay={mouseEnterDelay}
+          >
+            <Button
+              icon={hiddenPinyin ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+              onClick={toggleHiddenPinyin}
+            />
+          </Tooltip>
         </Input.Group>
       </div>
-      <Modal
-        width={480}
-        title='同步设置'
-        visible={visible}
-        cancelText='取消'
-        okText='确定'
-        onCancel={() => setVisible(false)}
-        onOk={() => {
-          const values = formRef.getFieldsValue()
-          onSignIn(values.binId, values.name, {
-            onOk: () => setVisible(false),
-          })
-        }}
-        destroyOnClose
-      >
-        <Form form={formRef}>
-          <Form.Item name='binId' label='BIN_ID'>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name='name'
-            label='用户名'
-            extra={
-              <Typography.Text type='secondary'>
-                默认使用云端用户名，如果没有用户名会根据当前值创建。
-              </Typography.Text>
-            }
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-        <Typography.Paragraph type='secondary'>
-          同步功能基于&nbsp;
-          <a href='https://jsonbin.io/' target='_blank' rel='noreferrer'>
-            JSONbin
-          </a>
-          &nbsp; 实现，可自行注册并创建一个公开 BIN 后将 BIN_ID
-          贴于此处确认即可。
-        </Typography.Paragraph>
-        <Typography.Text type='secondary'>
-          当然，如果不想注册的话，可邮箱
-          <a href='mailto:yuns.xie@qq.com' target='_blank' rel='noreferrer'>
-            联系我
-          </a>
-          为你创建 BIN_ID。
-        </Typography.Text>
-      </Modal>
-      <Drawer
-        width={360}
-        title={<Typography.Title level={4}>控制面板</Typography.Title>}
-        visible={settingsVisible}
-        onClose={() => toggleSettingsVisible()}
-      >
-        <List size='small' bordered className={styles.settingsList}>
-          <List.Item onClick={onClearCache}>清除缓存</List.Item>
-        </List>
-        <Button
-          type='primary'
-          icon={<GithubOutlined />}
-          className={styles.github}
-          href='https://github.com/theprimone/pinyin'
-          target='_blank'
-        >
-          Star
-        </Button>
-      </Drawer>
     </div>
   )
 }

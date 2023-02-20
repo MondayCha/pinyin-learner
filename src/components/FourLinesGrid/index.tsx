@@ -12,11 +12,12 @@ import hintSoundPath from '@/assets/sounds/hint.wav'
 
 export interface FourLinesGridProps extends GridProps {
   value?: string
+  hidden: boolean
   onChange?: (value: string) => void
 }
 
 export default function FourLinesGrid(props: FourLinesGridProps) {
-  const { original, capitalized = true } = props
+  const { original, capitalized = true, hidden } = props
 
   const [value, setValue] = useControllableValue<string>(props, {
     valuePropName: 'modified',
@@ -24,13 +25,19 @@ export default function FourLinesGrid(props: FourLinesGridProps) {
   const [focued, { toggle }] = useBoolean(false)
 
   const clickSound = React.useMemo(() => {
-    return new Audio(clickSoundPath)
+    const audio = new Audio(clickSoundPath)
+    audio.volume = 0.7
+    return audio
   }, [])
   const beepSound = React.useMemo(() => {
-    return new Audio(beepSoundPath)
+    const audio = new Audio(beepSoundPath)
+    audio.volume = 0.3
+    return audio
   }, [])
   const hintSound = React.useMemo(() => {
-    return new Audio(hintSoundPath)
+    const audio = new Audio(hintSoundPath)
+    audio.volume = 0.25
+    return audio
   }, [])
 
   const handleChange = (nextValue = '') => {
@@ -66,6 +73,7 @@ export default function FourLinesGrid(props: FourLinesGridProps) {
           original={original}
           modified={value}
           cursor={focued}
+          hidden={hidden}
           className={styles.dummyInput}
         />
       </div>
