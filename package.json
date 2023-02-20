@@ -1,10 +1,11 @@
 {
-  "name": "pinyin",
+  "name": "pinyin-learner",
   "version": "0.0.0",
   "scripts": {
-    "dev": "cross-env BROWSER=chrome vite",
+    "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
+    "tauri": "tauri",
     "start": "npm run dev",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@ant-design/icons": "^4.5.0",
     "@jannajs/lint": "^2.1.2",
+    "@tauri-apps/cli": "^1.2.3",
     "@types/classnames": "^2.2.11",
     "@types/lodash-es": "^4.17.4",
     "@types/react": "^18.0.18",
